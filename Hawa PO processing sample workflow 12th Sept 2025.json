@@ -1,0 +1,645 @@
+{
+  "name": "Hawa PO processing sample workflow 12th Sept 2025",
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0b9a1e8c-e8a8-4fe6-941f-f9a17cf33615",
+              "leftValue": "={{ $('WhatsApp PO Trigger').item.json.messages[0].text.body.length }}",
+              "rightValue": 5,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -640,
+        16
+      ],
+      "id": "e0aa1bd1-e27f-4644-bea6-2fbddf0c68c9",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cdc1f705-ca68-4fab-b301-984b29b434fb",
+              "leftValue": "={{ $('Find Mill').item.json.Mill_Name }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        32,
+        -32
+      ],
+      "id": "6b862dce-560f-4e97-8b96-d86e269f8a5f",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Parse this order and create a professional PO email:\n\nOrder: {{ $('WhatsApp PO Trigger').item.json.messages[0].text.body }}\nMill: {{ $('Find Mill').item.json.Mill_Name }}\n\nCreate an HTML email in this EXACT format:\n\n<p><strong>TO DATE:</strong> {{ new Date().toLocaleDateString('en-GB') }}</p>\n<p><strong>{{ $('Find Mill').item.json.Mill_Name }}</strong></p>\n<p><strong>PO NO:</strong> {{ Math.floor(Math.random() * 1000) + 1 }}</p>\n\n<p>Dear Sir,</p>\n<p>Please find below the order details, kindly dispatch the same urgently</p>\n\n<p><strong>H.G. Hawa & Co Insurance Policy Number 2001/328619409/00/000</strong></p>\n\n[Extract and format all paper specifications, dimensions, quantities from the order]\n\n<p><strong>Thanking You,<br>\nFor: H.G.Hawa & Co<br>\nAFROZ</strong></p>\n\nFormat it professionally and extract all paper details, sizes, quantities, and rates from the order text.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        -48
+      ],
+      "id": "10821d97-3605-4103-bd8e-d3e13356679f",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        208,
+        112
+      ],
+      "id": "7eb4d9af-4a83-4f2a-9875-0d043d31ab25",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "X38RzVKWufBUBBvW",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the WhatsApp message\nconst orderText = $('WhatsApp PO Trigger').item.json.messages[0].text.body;\nconst orderTextLower = orderText.toLowerCase();\n\n// Get all mills data\nconst millsData = $('Get row(s) in sheet').all();\n\nlet foundMill = null;\nlet bestMatch = { score: 0, mill: null };\n\n// Method 1: Extract mill name from \"TO,\" line\nconst lines = orderText.split('\\n');\nlet millNameFromTO = '';\n\nfor (let line of lines) {\n  line = line.trim();\n  if (line.toLowerCase().startsWith('to,') || line.toLowerCase().includes('to,')) {\n    // Extract the line after TO,\n    const nextLineIndex = lines.indexOf(line) + 1;\n    if (nextLineIndex < lines.length) {\n      millNameFromTO = lines[nextLineIndex].trim();\n      // Remove common words\n      millNameFromTO = millNameFromTO.replace(/ltd\\.?|limited|pvt\\.?|private|company|co\\.?/gi, '').trim();\n      break;\n    }\n  }\n}\n\nconsole.log(\"Extracted mill name from TO line:\", millNameFromTO);\n\n// Method 2: Search through all mills\nfor (let mill of millsData) {\n  if (!mill.json.Mill_Name) continue;\n  \n  const millName = mill.json.Mill_Name.toLowerCase();\n  const keywords = (mill.json.Keywords || '').toLowerCase();\n  \n  let matchScore = 0;\n  \n  // Check if mill name appears in the order text\n  const millWords = millName.replace(/ltd\\.?|limited|pvt\\.?|private|company|co\\.?/gi, '').trim().split(' ');\n  \n  for (let word of millWords) {\n    word = word.trim();\n    if (word.length > 2) { // Only check words longer than 2 characters\n      if (orderTextLower.includes(word)) {\n        matchScore += word.length; // Longer words get higher scores\n      }\n      if (millNameFromTO.toLowerCase().includes(word)) {\n        matchScore += word.length * 3; // Words from TO line get 3x score\n      }\n    }\n  }\n  \n  // Check keywords\n  if (keywords) {\n    const keywordList = keywords.split(',');\n    for (let keyword of keywordList) {\n      keyword = keyword.trim();\n      if (keyword.length > 1) {\n        if (orderTextLower.includes(keyword)) {\n          matchScore += keyword.length * 2;\n        }\n      }\n    }\n  }\n  \n  // Check for exact mill name match\n  if (millNameFromTO.toLowerCase().includes(millName.split(' ')[0].toLowerCase())) {\n    matchScore += 50; // Bonus for first word match\n  }\n  \n  console.log(`Mill: ${mill.json.Mill_Name}, Score: ${matchScore}`);\n  \n  if (matchScore > bestMatch.score) {\n    bestMatch = { score: matchScore, mill: mill.json };\n  }\n}\n\n// Return the best match if score is high enough\nif (bestMatch.score > 5) {\n  foundMill = bestMatch.mill;\n  console.log(\"Selected mill:\", foundMill.Mill_Name, \"with score:\", bestMatch.score);\n}\n\n// Return result\nif (foundMill) {\n  return [{\n    json: foundMill,\n    pairedItem: { item: 0 }\n  }];\n} else {\n  return [{\n    json: { \n      Mill_Name: \"Not Found\", \n      Email: \"error@example.com\", \n      Keywords: \"\",\n      error: \"No mill found\",\n      debug_extractedName: millNameFromTO,\n      debug_orderText: orderText.substring(0, 200) + \"...\"\n    },\n    pairedItem: { item: 0 }\n  }];\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -128,
+        -32
+      ],
+      "id": "90347f6e-83e1-4a17-90c1-1d911822beaf",
+      "name": "Find Mill"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -336,
+        224
+      ],
+      "id": "a04f23b3-1aa0-490b-b6a7-01ab0faf564e",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        160,
+        304
+      ],
+      "id": "07049fde-f11c-407a-90ec-ac60436db0ba",
+      "name": "No Operation, do nothing1"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -896,
+        160
+      ],
+      "id": "6ff549c1-b064-42e9-9b1c-af7c780fc8e0",
+      "name": "Gmail PO Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "UWJk0FXQiT6nw1yt",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "messages"
+        ],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "typeVersion": 1,
+      "position": [
+        -896,
+        -96
+      ],
+      "id": "a9084715-f9ea-464d-ba0f-ff8c3f5c8ebc",
+      "name": "WhatsApp PO Trigger",
+      "webhookId": "6a674706-4b34-40fc-888f-5c30476f178d",
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "credentials": {
+        "whatsAppTriggerApi": {
+          "id": "YqbHKGqG3INNxaX3",
+          "name": "WhatsApp OAuth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1mIysSyfvJLm8T7_RhLwTB_lSM0z_-vtcJ3mxt6L4JGI",
+          "mode": "list",
+          "cachedResultName": "Hawa Mill Master Database",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1mIysSyfvJLm8T7_RhLwTB_lSM0z_-vtcJ3mxt6L4JGI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1mIysSyfvJLm8T7_RhLwTB_lSM0z_-vtcJ3mxt6L4JGI/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -368,
+        -48
+      ],
+      "id": "5d0290b7-5bc9-4b53-95fb-ff603f6fa617",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "oFZe3PjQZwrp36XN",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "Po Number <> for customer <> ",
+        "emailType": "html",
+        "message": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        576,
+        -48
+      ],
+      "id": "4815cc38-6310-4f3a-b345-b4975c974ad4",
+      "name": "Create a draft",
+      "webhookId": "f8dbc11d-be5a-4eaf-be86-ab0a19450bd3",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "UWJk0FXQiT6nw1yt",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "WhatsApp PO Trigger": [
+      {
+        "json": {
+          "messaging_product": "whatsapp",
+          "metadata": {
+            "display_phone_number": "918693864317",
+            "phone_number_id": "779220355274646"
+          },
+          "contacts": [
+            {
+              "profile": {
+                "name": "Danish Shaikh"
+              },
+              "wa_id": "918108647381"
+            }
+          ],
+          "messages": [
+            {
+              "from": "918108647381",
+              "id": "wamid.HBgMOTE4MTA4NjQ3MzgxFQIAEhggQUMwRjlGQUExQkY4MkU5ODhERDU5QkJEM0ZBQjU5RTUA",
+              "timestamp": "1757669997",
+              "text": {
+                "body": "To Greentex\n\nAgreed 28.50 / basic rate 30\n\n16bf/120gsm\n1) 32 - 3 Reel\n2) 34 - 10 Reel\n3) 38 - 4 Reel\n4) 40 - 2 Reel\n5)  46 - 5 Reel. \n6) 49.5 - 3 Reel.\n7) 62 - 3 Reel.\n\nConsignee & Delivery: - INDORE PACKAGING INDUSTRIES, \nGat No. 94, Bhalekar Chowk, Sonawane Wasti Road, Opp. Shree Ganesh Cycles, Talwade, Pune – 412114.\nGST No. 27AABFI9864P1ZI."
+              },
+              "type": "text"
+            }
+          ],
+          "field": "messages"
+        }
+      }
+    ],
+    "Get row(s) in sheet": [
+      {
+        "json": {
+          "row_number": 2,
+          "Mill_Name": "Jodhani paper mill",
+          "Email": "sales2@jodhanipapers.com ",
+          "Keywords": "jodhani, jodhani paper, jodhani mill, jodhani papers"
+        }
+      },
+      {
+        "json": {
+          "row_number": 3,
+          "Mill_Name": "Sukraft recyclying  pvt ltd",
+          "Email": "srpl@sukraft.com ",
+          "Keywords": "sukraft, sukraft recycling, sukraft pvt, sukraft paper"
+        }
+      },
+      {
+        "json": {
+          "row_number": 4,
+          "Mill_Name": "Karnataka paper industry",
+          "Email": "kpihbd@gmail.com ",
+          "Keywords": "karnataka, karnataka paper, kpi, karnataka industry"
+        }
+      },
+      {
+        "json": {
+          "row_number": 5,
+          "Mill_Name": "Shree shakti paper",
+          "Email": "shreeshaktipaper@gmail.com",
+          "Keywords": "shree shakti, shakti paper, shree shakti mill"
+        }
+      },
+      {
+        "json": {
+          "row_number": 6,
+          "Mill_Name": "Lucky star paper mill",
+          "Email": "luckystarpaper86@gmail.com ",
+          "Keywords": "lucky star, lucky star paper, lucky paper mill"
+        }
+      },
+      {
+        "json": {
+          "row_number": 7,
+          "Mill_Name": "Greentex paper mill",
+          "Email": "greentexrpl@gmail.com ",
+          "Keywords": "greentex, green tex, greentex paper, greentex mill"
+        }
+      },
+      {
+        "json": {
+          "row_number": 8,
+          "Mill_Name": "Craftech paper mill pvt ltd",
+          "Email": "sales@craftechpaper.com ",
+          "Keywords": "craftech, craftech paper, crafttech mill"
+        }
+      },
+      {
+        "json": {
+          "row_number": 9,
+          "Mill_Name": "Aten paper mill",
+          "Email": "atenpaper2020@gmail.com ",
+          "Keywords": "aten, aten paper, aten mill"
+        }
+      },
+      {
+        "json": {
+          "row_number": 10,
+          "Mill_Name": "Twilight paper mill",
+          "Email": "twilightcraftpaper@gmail.com ",
+          "Keywords": "twilight, twilight paper, twilight craft"
+        }
+      },
+      {
+        "json": {
+          "row_number": 11,
+          "Mill_Name": "Ashton paper mill",
+          "Email": "sales@ashtonpapermill.com ",
+          "Keywords": "ashton, ashton paper, ashton mill"
+        }
+      },
+      {
+        "json": {
+          "row_number": 12,
+          "Mill_Name": "Ganga paper india ltd",
+          "Email": "sales@gangapapers.com ",
+          "Keywords": "ganga, ganga paper, ganga papers, ganga india"
+        }
+      },
+      {
+        "json": {
+          "row_number": 13,
+          "Mill_Name": "Paper packaging pvt.ltd",
+          "Email": "marketing.paperpkg@gmail.com ",
+          "Keywords": "paper packaging, packaging paper, paper pkg"
+        }
+      },
+      {
+        "json": {
+          "row_number": 14,
+          "Mill_Name": "JB kraft paper",
+          "Email": "jbcraftsales@gmail.com",
+          "Keywords": "jb, jb kraft, jb craft, jb paper"
+        }
+      },
+      {
+        "json": {
+          "row_number": 15,
+          "Mill_Name": "Sankalp paper mill",
+          "Email": " sales.sankalppaper@gmail.com ",
+          "Keywords": "sankalp, sankalp paper, sankalp mill"
+        }
+      },
+      {
+        "json": {
+          "row_number": 16,
+          "Mill_Name": "Skywin paper industries",
+          "Email": "sales@skywinpaper.com ",
+          "Keywords": "skywin, skywin paper, skywin industries"
+        }
+      },
+      {
+        "json": {
+          "row_number": 17,
+          "Mill_Name": "Nexois paper llp",
+          "Email": "account@nexoispaper.com ",
+          "Keywords": "nexo, nexo is, nexois, nexois paper"
+        }
+      },
+      {
+        "json": {
+          "row_number": 18,
+          "Mill_Name": "Shree Varudi paper mill",
+          "Email": "sales@shreevarudi.com ",
+          "Keywords": "varudi, shree varudi, varudi paper"
+        }
+      },
+      {
+        "json": {
+          "row_number": 19,
+          "Mill_Name": "Krafton paper mill",
+          "Email": "sales.kraftonpapers@gmail.com ",
+          "Keywords": "krafton, krafton paper, krafton mill"
+        }
+      },
+      {
+        "json": {
+          "row_number": 20,
+          "Mill_Name": "Aryan paper mill",
+          "Email": "ppc.apm@aryanpaper.com  ",
+          "Keywords": "aryan, aryan paper, aryan mill, apm"
+        }
+      },
+      {
+        "json": {
+          "row_number": 21,
+          "Mill_Name": "Best paper mill pvt.ltd",
+          "Email": "best.despatch@gmail.com",
+          "Keywords": "best, best paper, best mill, best paper mill"
+        }
+      },
+      {
+        "json": {
+          "row_number": 22,
+          "Mill_Name": "Maheshwari logistics ltd",
+          "Email": "pdsales@mlpl.biz ",
+          "Keywords": "maheshwari, mlpl, maheshwari logistics"
+        }
+      },
+      {
+        "json": {
+          "row_number": 23,
+          "Mill_Name": "Shree gajanan paper & product UNIT 1",
+          "Email": "sgpbshashi@gmail.com ",
+          "Keywords": "gajanan, shree gajanan, gajanan unit 1, sgpb"
+        }
+      },
+      {
+        "json": {
+          "row_number": 24,
+          "Mill_Name": "RA shaikh paper mill",
+          "Email": "sales.rashaikh@gmail.com",
+          "Keywords": "rashaikh, ra shaikh, shaikh paper"
+        }
+      },
+      {
+        "json": {
+          "row_number": 25,
+          "Mill_Name": "Sunshine pap tech pvt. Ltd",
+          "Email": "sales@sukraft.com ",
+          "Keywords": "sunshine, sunshine paptech, sunshine paper"
+        }
+      },
+      {
+        "json": {
+          "row_number": 26,
+          "Mill_Name": "Tapi paper mill",
+          "Email": "tpiplj@gmail.com ",
+          "Keywords": "tapi, tapi paper, tapi mill"
+        }
+      },
+      {
+        "json": {
+          "row_number": 27,
+          "Mill_Name": "Shree gajanan paper & product UNIT 2",
+          "Email": "Sgpb2sales@gmail.com ",
+          "Keywords": "gajanan, shree gajanan, gajanan unit 2, sgpb2"
+        }
+      },
+      {
+        "json": {
+          "row_number": 28,
+          "Mill_Name": "RA shaikh paper mill Morai",
+          "Email": "sales@rashaikh.com",
+          "Keywords": "rashaikh morai, ra shaikh morai, shaikh morai"
+        }
+      }
+    ],
+    "Find Mill": [
+      {
+        "json": {
+          "row_number": 7,
+          "Mill_Name": "Greentex paper mill",
+          "Email": "greentexrpl@gmail.com ",
+          "Keywords": "greentex, green tex, greentex paper, greentex mill"
+        }
+      }
+    ],
+    "AI Agent": [
+      {
+        "json": {
+          "output": "```html\n<p><strong>TO DATE:</strong> 12/09/2025</p>\n<p><strong>Greentex paper mill</strong></p>\n<p><strong>PO NO:</strong> 133</p>\n\n<p>Dear Sir,</p>\n<p>Please find below the order details, kindly dispatch the same urgently</p>\n\n<p><strong>H.G. Hawa & Co Insurance Policy Number 2001/328619409/00/000</strong></p>\n\n<p><strong>Order Details:</strong></p>\n<table border=\"1\" cellpadding=\"6\" cellspacing=\"0\" style=\"border-collapse: collapse; width: 400px;\">\n  <thead>\n    <tr>\n      <th>Size (in)</th>\n      <th>Quantity (Reels)</th>\n      <th>Rate (₹)</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td>32</td>\n      <td>3</td>\n      <td>28.50</td>\n    </tr>\n    <tr>\n      <td>34</td>\n      <td>10</td>\n      <td>28.50</td>\n    </tr>\n    <tr>\n      <td>38</td>\n      <td>4</td>\n      <td>28.50</td>\n    </tr>\n    <tr>\n      <td>40</td>\n      <td>2</td>\n      <td>28.50</td>\n    </tr>\n    <tr>\n      <td>46</td>\n      <td>5</td>\n      <td>28.50</td>\n    </tr>\n    <tr>\n      <td>49.5</td>\n      <td>3</td>\n      <td>28.50</td>\n    </tr>\n    <tr>\n      <td>62</td>\n      <td>3</td>\n      <td>28.50</td>\n    </tr>\n  </tbody>\n</table>\n\n<p><strong>Paper Specifications:</strong><br>\n16bf / 120gsm</p>\n\n<p><strong>Consignee & Delivery Address:</strong><br>\nINDORE PACKAGING INDUSTRIES,<br>\nGat No. 94, Bhalekar Chowk, Sonawane Wasti Road,<br>\nOpp. Shree Ganesh Cycles, Talwade,<br>\nPune – 412114.<br>\nGST No.: 27AABFI9864P1ZI</p>\n\n<p><strong>Basic Rate:</strong> ₹30.00<br>\n<strong>Agreed Rate:</strong> ₹28.50</p>\n\n<p><strong>Thanking You,<br>\nFor: H.G.Hawa & Co<br>\nAFROZ</strong></p>\n```"
+        }
+      }
+    ],
+    "Create a draft": [
+      {
+        "json": {
+          "id": "r-4842832869474314966",
+          "message": {
+            "id": "1993d603d450677f",
+            "threadId": "1993d603d450677f",
+            "labelIds": [
+              "DRAFT"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "connections": {
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Create a draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Mill": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail PO Trigger": {
+      "main": [
+        []
+      ]
+    },
+    "WhatsApp PO Trigger": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Find Mill",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "358d14ad-657d-4a3e-b5d0-111e09d3aa44",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3e2f18495e5bd8ff914008cd16d755a25c8c826fd8edca1986afb9c206b7eab3"
+  },
+  "id": "eaf9Yybn8jlm35ec",
+  "tags": []
+}
