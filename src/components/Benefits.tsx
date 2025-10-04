@@ -30,13 +30,13 @@ export default function Benefits() {
   ];
 
   return (
-    <section id="benefits" className="py-20 px-6 bg-white">
+    <section id="benefits" className="py-20 px-6 bg-white dark:bg-gray-900">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-serif font-bold text-gray-900 mb-4">
+          <h2 className="text-4xl md:text-5xl font-serif font-bold text-gray-900 dark:text-white mb-4">
             Why Indian SMBs choose Simbly.ai
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
             Built specifically for trading businesses that run on WhatsApp and Tally
           </p>
         </div>
@@ -47,15 +47,15 @@ export default function Benefits() {
             return (
               <div
                 key={index}
-                className="bg-gradient-to-br from-bg/40 to-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 border border-gray-100"
+                className="bg-gradient-to-br from-bg/40 to-white dark:from-gray-800/40 dark:to-gray-800 p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 dark:border-gray-700"
               >
                 <div className="w-14 h-14 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center mb-6 shadow-md">
                   <Icon size={28} className="text-white" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
                   {benefit.title}
                 </h3>
-                <p className="text-gray-600 leading-relaxed">
+                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
                   {benefit.description}
                 </p>
               </div>

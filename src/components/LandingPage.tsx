@@ -1,5 +1,6 @@
 import Navigation from './Navigation';
 import Hero from './Hero';
+import BeforeAfter from './BeforeAfter';
 import Benefits from './Benefits';
 import HowItWorks from './HowItWorks';
 import Testimonials from './Testimonials';
@@ -16,6 +17,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
     <div className="min-h-screen">
       <Navigation onNavigate={onNavigate} />
       <Hero />
+      <BeforeAfter />
       <Benefits />
       <HowItWorks />
       <Testimonials />

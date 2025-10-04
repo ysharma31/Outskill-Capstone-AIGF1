@@ -3,22 +3,22 @@ import heroBackground from '../assets/PO created copy.jpg';
 
 export default function Hero() {
   return (
-    <section id="hero" className="relative pt-32 pb-20 px-6 min-h-screen flex items-center">
+    <section id="hero" className="relative pt-32 pb-20 px-6 min-h-screen flex items-center bg-white dark:bg-gray-900">
       <div className="absolute inset-0 z-0">
         <img
           src={heroBackground}
           alt="SMB Owner"
-          className="w-full h-full object-cover opacity-15"
+          className="w-full h-full object-cover opacity-15 dark:opacity-10"
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-white/95 via-white/90 to-secondary/10"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-white/95 via-white/90 to-secondary/10 dark:from-gray-900/95 dark:via-gray-900/90 dark:to-secondary/5"></div>
       </div>
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div>
-            <h1 className="text-5xl md:text-6xl font-serif font-bold text-gray-900 leading-tight mb-6">
+            <h1 className="text-5xl md:text-6xl font-serif font-bold text-gray-900 dark:text-white leading-tight mb-6">
               Turn WhatsApp messages into orders, automatically!
             </h1>
-            <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
               Save 10+ hours weekly and cut errors by 70%.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
@@ -26,7 +26,7 @@ export default function Hero() {
                 Book a Demo
                 <ArrowRight size={20} />
               </button>
-              <button className="px-8 py-4 bg-white text-primary font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border-2 border-primary flex items-center justify-center gap-2">
+              <button className="px-8 py-4 bg-white dark:bg-gray-800 text-primary font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border-2 border-primary flex items-center justify-center gap-2">
                 <Play size={20} />
                 Watch How it Works
               </button>
@@ -34,17 +34,17 @@ export default function Hero() {
             <div className="mt-8 flex items-center gap-8">
               <div>
                 <div className="text-3xl font-bold text-primary">10+</div>
-                <div className="text-sm text-gray-600">Hours saved weekly</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Hours saved weekly</div>
               </div>
-              <div className="w-px h-12 bg-gray-300"></div>
+              <div className="w-px h-12 bg-gray-300 dark:bg-gray-600"></div>
               <div>
                 <div className="text-3xl font-bold text-primary">70%</div>
-                <div className="text-sm text-gray-600">Error reduction</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Error reduction</div>
               </div>
-              <div className="w-px h-12 bg-gray-300"></div>
+              <div className="w-px h-12 bg-gray-300 dark:bg-gray-600"></div>
               <div>
                 <div className="text-3xl font-bold text-primary">3x</div>
-                <div className="text-sm text-gray-600">More orders</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">More orders</div>
               </div>
             </div>
           </div>
