@@ -1,5 +1,5 @@
 import { ArrowRight, CheckCircle, XCircle } from 'lucide-react';
-import frustratedPerson from '../assets/PO created.jpg';
+import frustratedPerson from '../assets/WhatsApp Image 2025-10-03 at 21.40.06.jpeg';
 import happyPerson from '../assets/PO created copy.jpg';
 
 export default function BeforeAfter() {

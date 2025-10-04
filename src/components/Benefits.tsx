@@ -4,7 +4,7 @@ export default function Benefits() {
   const benefits = [
     {
       icon: Clock,
-      title: 'Save 10+ hours weekly',
+      title: 'Save over 10+ hours per person weekly',
       description: 'Automate manual order entry, data processing, and follow-ups. Focus on growing your business instead of paperwork.',
     },
     {

@@ -1,22 +1,25 @@
 import { MessageSquare, FileCheck, Send, Phone, FileText, LayoutDashboard } from 'lucide-react';
 
 export default function HowItWorks() {
-  const steps = [
+  const sequentialSteps = [
     {
       icon: MessageSquare,
-      title: 'Receive WhatsApp order',
-      description: 'Customer sends order details via WhatsApp like they always do',
+      title: 'Receive WhatsApp Orders',
+      description: 'Customers send an order via WhatsApp in different formats',
     },
     {
       icon: FileCheck,
       title: 'Auto-convert to purchase order',
-      description: 'Simbly instantly converts the message into a clean PO and saves it to your Gmail drafts',
+      description: 'Simbly instantly converts the message into a clean PO and saves it to your mailbox',
     },
     {
       icon: Send,
       title: 'Review and send to supplier',
-      description: 'You quickly review the auto-generated PO and send it to your supplier with one click',
+      description: 'Your team quickly reviews the auto-generated PO and sends it to your supplier with one click',
     },
+  ];
+
+  const additionalFeatures = [
     {
       icon: Phone,
       title: 'Auto-reminder calls',
@@ -42,43 +45,78 @@ export default function HowItWorks() {
             How Simbly.ai works
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            From WhatsApp message to completed order in 6 simple steps
+            From WhatsApp message to completed order in 3 simple steps
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {steps.map((step, index) => {
-            const Icon = step.icon;
-            return (
-              <div key={index} className="relative">
-                <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 h-full">
-                  <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0">
-                      <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center shadow-md">
-                        <Icon size={24} className="text-white" />
+        {/* Sequential Flow - Steps 1-3 */}
+        <div className="mb-16">
+          <div className="flex flex-col lg:flex-row gap-8 items-center justify-center">
+            {sequentialSteps.map((step, index) => {
+              const Icon = step.icon;
+              return (
+                <div key={index} className="relative flex-1 max-w-sm">
+                  <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 h-full">
+                    <div className="text-center">
+                      <div className="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center shadow-md mx-auto mb-4">
+                        <Icon size={28} className="text-white" />
                       </div>
-                      <div className="mt-2 text-center">
-                        <span className="text-2xl font-bold text-primary">{index + 1}</span>
+                      <div className="mb-4">
+                        <span className="text-3xl font-bold text-primary">{index + 1}</span>
                       </div>
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      <h3 className="text-xl font-semibold text-gray-900 mb-3">
                         {step.title}
                       </h3>
-                      <p className="text-gray-600 text-sm leading-relaxed">
+                      <p className="text-gray-600 leading-relaxed">
                         {step.description}
                       </p>
                     </div>
                   </div>
+                  {/* Arrow pointing to next step */}
+                  {index < sequentialSteps.length - 1 && (
+                    <div className="hidden lg:flex absolute top-1/2 -right-8 w-16 h-16 items-center justify-center transform -translate-y-1/2 z-10">
+                      <div className="flex items-center">
+                        <div className="w-12 h-2 bg-primary rounded-full shadow-lg"></div>
+                        <div className="w-0 h-0 border-t-4 border-t-transparent border-l-6 border-l-primary border-b-4 border-b-transparent ml-1"></div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                {index < steps.length - 1 && (
-                  <div className="hidden lg:block absolute top-1/2 -right-4 w-8 h-0.5 bg-gradient-to-r from-primary to-secondary transform -translate-y-1/2 z-10">
-                    <div className="absolute right-0 top-1/2 w-2 h-2 bg-secondary rounded-full transform translate-x-1 -translate-y-1/2"></div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Additional Features - Steps 4-6 */}
+        <div className="mb-16">
+          <div className="text-center mb-12">
+            <h3 className="text-3xl font-serif font-bold text-gray-900 mb-4">
+              Plus these powerful features
+            </h3>
+            <p className="text-lg text-gray-600">
+              Additional automation tools to streamline your business
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8">
+            {additionalFeatures.map((feature, index) => {
+              const Icon = feature.icon;
+              return (
+                <div key={index} className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 h-full">
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-gradient-to-br from-secondary to-primary rounded-full flex items-center justify-center shadow-md mx-auto mb-4">
+                      <Icon size={28} className="text-white" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                      {feature.title}
+                    </h3>
+                    <p className="text-gray-600 leading-relaxed">
+                      {feature.description}
+                    </p>
                   </div>
-                )}
-              </div>
-            );
-          })}
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         <div className="mt-16 bg-white rounded-2xl shadow-xl overflow-hidden">

@@ -19,7 +19,7 @@ export default function Hero() {
               Turn WhatsApp messages into orders, automatically!
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
-              Save 10+ hours weekly and cut errors by 70%.
+              Save over 10+ hours per person weekly and cut errors by 70%.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <button className="px-8 py-4 bg-primary text-white font-semibold rounded-full shadow-[0_8px_24px_rgba(30,90,125,0.35)] hover:shadow-[0_12px_32px_rgba(30,90,125,0.45)] transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2 hover:bg-[#174864]">
@@ -28,7 +28,7 @@ export default function Hero() {
               </button>
               <button className="px-8 py-4 bg-white dark:bg-gray-800 text-primary font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border-2 border-primary flex items-center justify-center gap-2">
                 <Play size={20} />
-                Watch How it Works
+                Watch How It Works
               </button>
             </div>
             <div className="mt-8 flex items-center gap-8">
