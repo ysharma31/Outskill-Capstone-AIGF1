@@ -1,4 +1,6 @@
 import { MessageSquare, FileCheck, Send, Phone, FileText, LayoutDashboard } from 'lucide-react';
+import { supabase } from '../lib/supabase'
+
 
 export default function HowItWorks() {
   const steps = [
