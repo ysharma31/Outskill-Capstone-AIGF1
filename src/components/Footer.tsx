@@ -1,5 +1,7 @@
 import { Mail, MessageSquare, Linkedin, Twitter } from 'lucide-react';
 import logo from '../assets/Simbly-logo copy.jpg';
+import { supabase } from '../lib/supabase'
+
 
 export default function Footer() {
   return (
