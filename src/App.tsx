@@ -5,7 +5,7 @@ import SupabaseTest from './components/SupabaseTest';
 import MillsTest from './components/MillsTest';
 
 function App() {
-  const [currentView, setCurrentView] = useState<'landing' | 'dashboard' | 'test' | 'mills'>('mills');
+  const [currentView, setCurrentView] = useState<'landing' | 'dashboard' | 'test' | 'mills'>('landing');
 
   const handleNavigation = (section: string) => {
     if (section === 'dashboard') {
