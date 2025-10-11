@@ -1,5 +1,7 @@
 import { Play, ArrowRight } from 'lucide-react';
 import heroBackground from '../assets/PO created copy.jpg';
+import { supabase } from '../lib/supabase'
+
 
 export default function Hero() {
   return (
