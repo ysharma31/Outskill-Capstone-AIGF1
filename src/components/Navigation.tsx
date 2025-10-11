@@ -1,6 +1,8 @@
 import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import logo from '../assets/Simbly-logo copy.jpg';
+import { supabase } from '../lib/supabase'
+
 
 interface NavigationProps {
   onNavigate: (section: string) => void;
