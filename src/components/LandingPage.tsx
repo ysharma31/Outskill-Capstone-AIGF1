@@ -6,6 +6,7 @@ import Testimonials from './Testimonials';
 import Pricing from './Pricing';
 import FAQ from './FAQ';
 import Footer from './Footer';
+import { supabase } from '../lib/supabase'
 
 interface LandingPageProps {
   onNavigate: (section: string) => void;
