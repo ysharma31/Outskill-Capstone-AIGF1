@@ -1,4 +1,6 @@
 import { Clock, Target, TrendingUp, Phone, FileText } from 'lucide-react';
+import { supabase } from '../lib/supabase'
+
 
 export default function Benefits() {
   const benefits = [
