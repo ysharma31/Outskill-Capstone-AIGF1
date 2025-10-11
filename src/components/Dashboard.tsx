@@ -1,5 +1,7 @@
 import { LayoutDashboard, Package, Clock, CheckCircle, AlertCircle, TrendingUp, DollarSign, Users } from 'lucide-react';
 import logo from '../assets/Simbly-logo copy.jpg';
+import { supabase } from '../lib/supabase'
+
 
 interface DashboardProps {
   onNavigate: (section: string) => void;
